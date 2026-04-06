@@ -1,0 +1,4 @@
+﻿id,nombre,email,telefono,fecha_registro,estado,motivo_error,fecha_proceso
+2,Carlos Ruiz,carlos.email.com,3009876543,2025-01-12,error,email inválido,2026-04-04T14:26:40.511Z
+,Laura Gomez,laura@email.com,3005556677,2025-01-15,error,id vacío,2026-04-04T14:26:40.511Z
+4,Miguel Torres,miguel@email.com,3004443322,15-01-2025,error,fecha inválida (YYYY-MM-DD),2026-04-04T14:26:40.511Z

@@ -1,0 +1,244 @@
+{
+  "name": "Validador CSV de clientes",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        16
+      ],
+      "id": "024010f2-91a1-4a82-9df1-28c28d5b32dd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "function isValidDateYYYYMMDD(s) {\n  return /^\\d{4}-\\d{2}-\\d{2}$/.test(String(s || \"\"));\n}\n\nconst salida = [];\nconst fechaProceso = new Date().toISOString();\n\nfor (const item of items) {\n  const r = item.json;\n  const motivos = [];\n\n  if (!r.id || String(r.id).trim() === \"\") {\n    motivos.push(\"id vacío\");\n  }\n\n  if (!r.email || !String(r.email).includes(\"@\")) {\n    motivos.push(\"email inválido\");\n  }\n\n  if (!r.fecha_registro || !isValidDateYYYYMMDD(r.fecha_registro)) {\n    motivos.push(\"fecha inválida (YYYY-MM-DD)\");\n  }\n\n  if (motivos.length > 0) {\n    salida.push({\n      json: {\n        ...r,\n        estado: \"error\",\n        motivo_error: motivos.join(\"; \"),\n        fecha_proceso: fechaProceso\n      }\n    });\n  } else {\n    salida.push({\n      json: {\n        ...r,\n        estado: \"valido\",\n        fecha_proceso: fechaProceso\n      }\n    });\n  }\n}\n\nreturn salida;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        16
+      ],
+      "id": "78263da6-a24e-4376-b3ec-f3895ee4a176",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a9f89515-0243-41d3-b09a-6208eedc1763",
+              "leftValue": "={{$json.estado}}",
+              "rightValue": "valido",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        16
+      ],
+      "id": "d867a253-524a-4c75-8891-fd282c6a0318",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        112
+      ],
+      "id": "e6fefa16-e023-43c0-b8a2-8589b071c7fc",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/.n8n-files/clientes_validos.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        112
+      ],
+      "id": "4c396150-89e0-40f3-838b-093362b0f7dc",
+      "name": "Read/Write Files from Disk3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -80
+      ],
+      "id": "1a083699-4891-4d04-b814-596ed47785d1",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/.n8n-files/clientes_error.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        -80
+      ],
+      "id": "730bc08c-8702-419e-afba-5efd94d6ef86",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/clientes.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        16
+      ],
+      "id": "bc5a6ccc-47ec-4c69-910e-969f55ba1157",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        16
+      ],
+      "id": "638d0753-bb68-42da-a913-36d4dfdaf496",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0dbe3450-30d9-47d3-b3a3-760efd39ad25",
+  "meta": {
+    "instanceId": "29900becc7b06786084b63b71bfe4fc63f944e72a2227038954a4c55eaf86d58"
+  },
+  "id": "OJ6aXwab3tJO5y1j",
+  "tags": []
+}
